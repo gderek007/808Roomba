@@ -1,7 +1,7 @@
 import mercury
 #From this library https://github.com/gotthardp/python-mercuryapi
 from  pycreate2 import Create2
-#From this library https://github.com/MomsFriendlyRobotCompany/pycreate2/blob/master/examples/runExample.py
+#From this library https://github.com/MomsFriendlyRobotCompany/pycreate2
 import time
 import random as r
 #ls on dev and choose cu.usbmodemXXXXXX
@@ -36,12 +36,16 @@ while (True):
     #have not tested
     closest_tag = getClosestTag()
     #move robot forward
+    if (len(identified_tags) == len(total_tags_names)) :
+        break
     if abs( closest_tag.rssi ) < 55 :
         if ( getTagName(closest_tag) == (wanted_tag) ) :
             identified_tags.add( wanted_tag )
             tags_left = total_tags_names - identified_tags
             # gets a random tag from our wanted set
             wanted_tag = r.sample(tags_left, 1) [0]
+            #clean for some amount of time
+            #code for cleaning around the RFID Tag
     else :
         previous_reading = abs(closest_tag.rssi)
         # rotate robot CW
