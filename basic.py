@@ -6,7 +6,7 @@ from  pycreate2 import Create2
 import time
 import random as r
 #ls on dev and choose cu.usbmodemXXXXXX
-reader = mercury.Reader("tmr:///dev/cu.usbmodem14201")
+reader = mercury.Reader("tmr:///dev/cu.usbmodem14301")
 reader.set_region("EU3")
 reader.set_read_plan([4], "GEN2")
 
@@ -21,6 +21,16 @@ total_tags_names, identified_tags  = set() , set()
 total_tags_names = {'E2004740D42BFE4A755E1887' , 'E28011700000020F4CB328F0', 'E200001D5607014724307EBD', '300833B2DDD9014000000000', \
     'E2801170000002118067C4E5', 'E20043B7034FB3891A4627D1', 'E2000020780A003117906133', 'E28011700000020A7B2E8D44'}
 closest_tag, wanted_tag = 0 , 'E2004740D42BFE4A755E1887'
+## ROBOT SETUP:
+## set port to usb serial value 
+port = '/dev/tty.usbserial-DN0289CJ'  # this is the serial port on my iMac
+baud = {
+        'default': 115200,
+        'alt': 19200  # shouldn't need this unless you accidentally set it to this
+    }
+bot = Create2(port=port, baud=baud['default'])
+bot.start()
+bot.safe()
 
 def getClosestTag():
     tags = reader.read()
@@ -39,12 +49,17 @@ while (True):
     closest_tag = getClosestTag()
     #(print( getTagName(closest_tag) , closest_tag.rssi  ))
     #move robot forward
+    bot.drive_direct(100, 100)
+    time.sleep(3)
+    
     if (len(identified_tags) == len(total_tags_names)) :
         break
     if abs( closest_tag.rssi ) <= 60 :
         # TODO might have to change this approach to just grab any tag not specifically the wanted tag
         # just check if the tag has been discovered already
         if ( getTagName(closest_tag) not in identified_tags ) :
+            bot.drive_stop()
+            time.sleep(0.1)
             print("Found: ", getTagName(closest_tag), closest_tag.rssi)
             identified_tags.add( getTagName(closest_tag) )
             tags_left = total_tags_names - identified_tags
@@ -64,6 +79,7 @@ while (True):
             pass
         else:
             # tag changed? make sure dont move
+            bot.drive_stop()
             time.sleep(1)
             closest_tag = getClosestTag()
         post_reading = abs(closest_tag.rssi)
