@@ -35,14 +35,19 @@ bot.safe()
 
 
 bot.drive_direct(100, 0)
+bot.drive_stop()
 time.sleep(2)
 bot.drive_direct(200, 0)
+bot.drive_stop()
 time.sleep(2)
 bot.drive_direct(300, 0)
+bot.drive_stop()
 time.sleep(2)
 bot.drive_direct(400, 0)
+bot.drive_stop()
 time.sleep(2)
 bot.drive_direct(500, 0)
+bot.drive_stop()
 time.sleep(2)
 
 def getClosestTag():
