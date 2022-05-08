@@ -24,14 +24,14 @@ closest_tag, wanted_tag = 0 , 'E2004740D42BFE4A755E1887'
 
 def getClosestTag():
     tags = reader.read()
-    tags.sort(key = lambda x: abs(x.rssi) )
-    for i in tags:
-         print( getTagName(i) , i.rssi  )
-    print()
+    tags.sort(key = lambda x: abs(x.rssi) ) 
     for i in range (len(tags)):
-        tag = tags[i]
-        if (getTagName(tag) not in identified_tags) :
-            return tag
+        tag = tags[i] 
+        if getTagName(tag) in total_tags_names:
+            print( getTagName(tag) , tag.rssi  )
+            print()
+            if (getTagName(tag) not in identified_tags) :
+                return tag
     return -1
 
 def getTagName(tag):

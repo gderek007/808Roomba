@@ -34,14 +34,14 @@ bot.safe()
 
 def getClosestTag():
     tags = reader.read()
-    tags.sort(key = lambda x: abs(x.rssi) )
-    for i in tags:
-         print( getTagName(i) , i.rssi  )
-    print()
+    tags.sort(key = lambda x: abs(x.rssi) ) 
     for i in range (len(tags)):
-        tag = tags[i]
-        if (getTagName(tag) not in identified_tags) :
-            return tag
+        tag = tags[i] 
+        if getTagName(tag) in total_tags_names:
+            print( getTagName(tag) , tag.rssi  )
+            print()
+            if (getTagName(tag) not in identified_tags) :
+                return tag
     return -1
 
 def getTagName(tag):
@@ -58,8 +58,6 @@ while (True):
     #move robot forward
     bot.drive_direct(100, 100)
     time.sleep(3)
-
-
     if (len(identified_tags) == len(total_tags_names)) :
         break
     if abs( closest_tag.rssi ) <= 60 :
