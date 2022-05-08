@@ -6,13 +6,9 @@ from  pycreate2 import Create2
 import time
 import random as r
 #ls on dev and choose cu.usbmodemXXXXXX
-reader = mercury.Reader("tmr:///dev/cu.usbmodem142301")
+reader = mercury.Reader("tmr:///dev/cu.usbmodem14201")
 reader.set_region("EU3")
 reader.set_read_plan([4], "GEN2")
-#print tags 
-tags = (reader.read())
-for i in tags:
-    print(i.rssi, i)
 
 # RFID Tag Names Names
 # {300833B2DDD9014000000000 , E28011700000020A7B2E8D44, E200001D5607014724307EB8 , E28011700000020F4CB328F0, 
@@ -21,13 +17,17 @@ for i in tags:
 #dict might be useful to map name to RSSI? not too sure tho 
 tag_dictionary = {}
 total_tags_names, identified_tags  = set() , set()
-total_tags_names = {'300833B2DDD9014000000000' , 'E28011700000020A7B2E8D44', 'E200001D5607014724307EB8' , 'E28011700000020F4CB328F0', \
-'E2004740D42BFE4A755E1887', 'E2000020780A003117906133', 'E2801170000002118067C4E5', 'E20043B7034FB3891A4627D1'}
-closest_tag, wanted_tag = 0 , 0
+# ordered ABC from our sticky notes, A-H
+total_tags_names = {'E2004740D42BFE4A755E1887' , 'E28011700000020F4CB328F0', 'E200001D5607014724307EBD', '300833B2DDD9014000000000', \
+    'E2801170000002118067C4E5', 'E20043B7034FB3891A4627D1', 'E2000020780A003117906133', 'E28011700000020A7B2E8D44'}
+closest_tag, wanted_tag = 0 , 'E2004740D42BFE4A755E1887'
 
 def getClosestTag():
     tags = reader.read()
     tags.sort(key = lambda x: abs(x.rssi) )
+    # for i in tags:
+    #     print( getTagName(i) , i.rssi  )
+    # print()
     return tags[0] 
 
 def getTagName(tag):
@@ -37,15 +37,18 @@ while (True):
     #synchronous reading
     #have not tested
     closest_tag = getClosestTag()
+    #(print( getTagName(closest_tag) , closest_tag.rssi  ))
     #move robot forward
     if (len(identified_tags) == len(total_tags_names)) :
         break
-    if abs( closest_tag.rssi ) < 55 :
+    if abs( closest_tag.rssi ) <= 60 :
         # TODO might have to change this approach to just grab any tag not specifically the wanted tag
         # just check if the tag has been discovered already
         if ( getTagName(closest_tag) not in identified_tags ) :
-            identified_tags.add( wanted_tag )
+            print("Found: ", getTagName(closest_tag), closest_tag.rssi)
+            identified_tags.add( getTagName(closest_tag) )
             tags_left = total_tags_names - identified_tags
+            print("Tags Left:", len(tags_left))
             # gets a random tag from our wanted set
             wanted_tag = r.sample(tags_left, 1) [0]
             # clean for some amount of time
@@ -79,6 +82,8 @@ while (True):
 
 
 print("Done")
+#clean up one last time??
+
 # TODO set up for the Creat2 Robot
 # Create a Create2 Robot
 # ls on dev and choose usbserial-XXXXXXXX
