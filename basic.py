@@ -22,6 +22,17 @@ total_tags_names = {'E2004740D42BFE4A755E1887' , 'E28011700000020F4CB328F0', 'E2
     'E2801170000002118067C4E5', 'E20043B7034FB3891A4627D1', 'E2000020780A003117906133', 'E28011700000020A7B2E8D44'}
 closest_tag, wanted_tag = 0 , 'E2004740D42BFE4A755E1887'
 
+## ROBOT SETUP:
+## set port to usb serial value 
+port = '/dev/tty.usbserial-DN0289CJ'  # this is the serial port on my iMac
+baud = {
+        'default': 115200,
+        'alt': 19200  # shouldn't need this unless you accidentally set it to this
+    }
+bot = Create2(port=port, baud=baud['default'])
+bot.start()
+bot.safe()
+
 def getClosestTag():
     tags = reader.read()
     tags.sort(key = lambda x: abs(x.rssi) )
@@ -38,13 +49,19 @@ while (True):
     #have not tested
     closest_tag = getClosestTag()
     #(print( getTagName(closest_tag) , closest_tag.rssi  ))
+    
     #move robot forward
+    bot.drive_direct(100, 100)
+    time.sleep(3)
+    
     if (len(identified_tags) == len(total_tags_names)) :
         break
     if abs( closest_tag.rssi ) <= 60 :
         # TODO might have to change this approach to just grab any tag not specifically the wanted tag
         # just check if the tag has been discovered already
         if ( getTagName(closest_tag) not in identified_tags ) :
+            bot.drive_stop()
+            time.sleep(0.1)
             print("Found: ", getTagName(closest_tag), closest_tag.rssi)
             identified_tags.add( getTagName(closest_tag) )
             tags_left = total_tags_names - identified_tags
