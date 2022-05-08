@@ -82,6 +82,8 @@ while (True):
 
 
 print("Done")
+#clean up one last time??
+
 # TODO set up for the Creat2 Robot
 # Create a Create2 Robot
 # ls on dev and choose usbserial-XXXXXXXX
