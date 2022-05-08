@@ -58,7 +58,11 @@ while (True):
         # TODO might have to change this approach to just grab any tag not specifically the wanted tag
         # just check if the tag has been discovered already
         if ( getTagName(closest_tag) not in identified_tags ) :
-            bot.drive_stop()
+            ## have robot behavior --> found tag
+            bot.drive_direct(100,0)
+            bot.drive_direct(100,0)
+            bot.drive_direct(100,0)
+            bot.drive_direct(100,0)
             time.sleep(0.1)
             print("Found: ", getTagName(closest_tag), closest_tag.rssi)
             identified_tags.add( getTagName(closest_tag) )
