@@ -6,7 +6,7 @@ from  pycreate2 import Create2
 import time
 import random as r
 #ls on dev and choose cu.usbmodemXXXXXX
-reader = mercury.Reader("tmr:///dev/cu.usbmodem14301")
+reader = mercury.Reader("tmr:///dev/cu.usbmodem14201")
 reader.set_region("EU3")
 reader.set_read_plan([4], "GEN2")
 
