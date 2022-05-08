@@ -59,15 +59,8 @@ while (True):
         # just check if the tag has been discovered already
         if ( getTagName(closest_tag) not in identified_tags ) :
             ## have robot behavior --> found tag
-            time.sleep(2)
-            bot.drive_direct(200,0)
-            time.sleep(1)
-            bot.drive_direct(200,0)
-            time.sleep(1)
-            bot.drive_direct(200,0)
-            time.sleep(1)
-            bot.drive_direct(200,0)
-            time.sleep(0.1)
+            bot.drive_direct(-100, -100)
+            
             print("Found: ", getTagName(closest_tag), closest_tag.rssi)
             identified_tags.add( getTagName(closest_tag) )
             tags_left = total_tags_names - identified_tags
