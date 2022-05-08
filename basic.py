@@ -32,6 +32,19 @@ bot = Create2(port=port, baud=baud['default'])
 bot.start()
 bot.safe()
 
+
+
+bot.drive_direct(100, 0)
+time.sleep(2)
+bot.drive_direct(200, 0)
+time.sleep(2)
+bot.drive_direct(300, 0)
+time.sleep(2)
+bot.drive_direct(400, 0)
+time.sleep(2)
+bot.drive_direct(500, 0)
+time.sleep(2)
+
 def getClosestTag():
     tags = reader.read()
     tags.sort(key = lambda x: abs(x.rssi) ) 
