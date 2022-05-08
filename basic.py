@@ -81,6 +81,7 @@ while (True):
             pass
         else:
             # tag changed? make sure dont move
+            bot.drive_stop()
             time.sleep(1)
             closest_tag = getClosestTag()
         post_reading = abs(closest_tag.rssi)
