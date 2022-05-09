@@ -34,7 +34,7 @@ bot = Create2(port=port, baud=baud['default'])
 bot.start()
 bot.safe()
 
-def getClosestTag():
+def getClosestTag(ignore = []):
     rootationCounter = 0
     while ( True ) :
         print("START READ:")
@@ -45,7 +45,8 @@ def getClosestTag():
             if getTagName(tag) in total_tags_names:
                 print( getTagLabel(tag) , tag.rssi  )
                 if (getTagName(tag) not in identified_tags) :
-                    return tag
+                    if getTagLabel(tag) not in ignore :
+                        return tag
         ## EXPLORE - rotates to discover tags
         print("SEARCHING, ROTATION #", rootationCounter)
         bot.drive_direct(100, 0)
@@ -72,11 +73,13 @@ while (True):
     #move 90 degrees to search for a tag
     if (len(identified_tags) == len(total_tags_names)) :
         break
+
     if closest_tag == -1 :
         bot.drive_direct(100, 100)
         time.sleep(2)
         bot.drive_stop()
         continue
+
     wanted_tag = closest_tag
     if abs( closest_tag.rssi ) <= 55 :
         # just check if the tag has been discovered already
@@ -97,17 +100,17 @@ while (True):
         # TODO do some sort of reading and moving until the rssi goes up
         bot.drive_direct(100, 100)
         time.sleep(0.5)
-        old_tag = closest_tag
         closest_tag = getClosestTag()
         post_reading = abs(closest_tag.rssi)
-        if (closest_tag == old_tag) :
-            pass
-        else:
+        ignoreTags = set()
+        if (closest_tag != wanted_tag) :
             # tag changed? make sure dont move
-            bot.drive_stop()
-            time.sleep(1)
-            closest_tag = getClosestTag()
-        
+            while (wanted_tag != closest_tag) :
+                ignoreTags.add(closest_tag)
+                closest_tag = getClosestTag(ignoreTags)
+                if closest_tag == -1 :
+                    wanted_tag = ignoreTags[-1]
+                    break
 
         delta = post_reading - previous_reading
         # positive delta means new reading is worst than old reading, therefore rotate CCW
@@ -118,15 +121,16 @@ while (True):
             bot.drive_direct(50, 0)
             time.sleep(2)
             bot.drive_stop()
-        else :
+        elif delta < 0 :
             #rotate right some more to get more readings
             #TODO rotate right
             #TODO command to rotate for some amount of seconds
             bot.drive_direct(50, 0)
             time.sleep(2)
             bot.drive_stop()
-            pass
-
+        else :
+            bot.drive_direct(100, 100)
+            time.sleep(0.5)
 
 print("Done")
 #clean up one last time??
