@@ -15,7 +15,8 @@ reader.set_read_plan([4], "GEN2")
 # E2004740D42BFE4A755E1887, E2000020780A003117906133, E2801170000002118067C4E5, E20043B7034FB3891A4627D1}
 
 #dict might be useful to map name to RSSI? not too sure tho 
-tag_dictionary = {}
+tag_dictionary = {'E2004740D42BFE4A755E1887': 'A', 'E28011700000020F4CB328F0':'B', 'E200001D5607014724307EBD':'C', '300833B2DDD9014000000000':'D', \
+    'E2801170000002118067C4E5':'E', 'E20043B7034FB3891A4627D1':'F', 'E2000020780A003117906133':'G', 'E28011700000020A7B2E8D44':'H'}
 total_tags_names, identified_tags  = set() , set()
 # ordered ABC from our sticky notes, A-H
 total_tags_names = {'E2004740D42BFE4A755E1887' , 'E28011700000020F4CB328F0', 'E200001D5607014724307EBD', '300833B2DDD9014000000000', \
@@ -23,19 +24,33 @@ total_tags_names = {'E2004740D42BFE4A755E1887' , 'E28011700000020F4CB328F0', 'E2
 closest_tag, wanted_tag = 0 , 'E2004740D42BFE4A755E1887'
 
 def getClosestTag():
-    tags = reader.read()
-    tags.sort(key = lambda x: abs(x.rssi) ) 
-    for i in range (len(tags)):
-        tag = tags[i] 
-        if getTagName(tag) in total_tags_names:
-            print( getTagName(tag) , tag.rssi  )
-            print()
-            if (getTagName(tag) not in identified_tags) :
-                return tag
-    return -1
+    rootationCounter = 0
+    while ( True ) :
+        print("START READ:")
+        tags = reader.read()
+        tags.sort(key = lambda x: abs(x.rssi) ) 
+        for i in range (len(tags)):
+            tag = tags[i] 
+            if getTagName(tag) in total_tags_names:
+                if getTagLabel(tag) =='F':
+                    print( getTagLabel(tag) , tag.rssi , tag.phase )
+                # if (getTagName(tag) not in identified_tags) :
+                #     return tag
+        ## EXPLORE - rotates to discover tags
+        # print("SEARCHING, ROTATION #", rootationCounter)
+        # bot.drive_direct(100, 0)
+        # time.sleep(2)
+        # bot.drive_stop()
+        # time.sleep(2)
+        # rootationCounter += 1
+        # if ( rootationCounter == 8 ):
+        return tags[0]
 
 def getTagName(tag):
     return str(tag.epc)[2:-1]
+
+def getTagLabel(tag):
+    return tag_dictionary[getTagName(tag)]
 
 while (True):
     #synchronous reading
