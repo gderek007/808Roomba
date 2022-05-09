@@ -32,33 +32,26 @@ bot = Create2(port=port, baud=baud['default'])
 bot.start()
 bot.safe()
 
-bot.drive_direct(100, 0)
-time.sleep(2)
-bot.drive_stop()
-bot.drive_direct(200, 0)
-time.sleep(2)
-bot.drive_stop()
-bot.drive_direct(300, 0)
-time.sleep(2)
-bot.drive_stop()
-bot.drive_direct(400, 0)
-time.sleep(2)
-bot.drive_stop()
-bot.drive_direct(500, 0)
-time.sleep(2)
-bot.drive_stop()
-
 def getClosestTag():
-    tags = reader.read()
-    tags.sort(key = lambda x: abs(x.rssi) ) 
-    for i in range (len(tags)):
-        tag = tags[i] 
-        if getTagName(tag) in total_tags_names:
-            print( getTagName(tag) , tag.rssi  )
-            print()
-            if (getTagName(tag) not in identified_tags) :
-                return tag
-    return -1
+    rootationCounter = 0
+    while ( True ) :
+        tags = reader.read()
+        tags.sort(key = lambda x: abs(x.rssi) ) 
+        for i in range (len(tags)):
+            tag = tags[i] 
+            if getTagName(tag) in total_tags_names:
+                print( getTagName(tag) , tag.rssi  )
+                print()
+                if (getTagName(tag) not in identified_tags) :
+                    return tag
+                else : 
+                    bot.drive_direct(100, 0)
+                    time.sleep(2)
+                    bot.drive_stop()
+                    rootationCounter += 1
+                    if ( rootationCounter == 8 ):
+                        return -1
+
 
 def getTagName(tag):
     return str(tag.epc)[2:-1]
