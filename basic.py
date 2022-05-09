@@ -44,13 +44,13 @@ def getClosestTag():
                 print()
                 if (getTagName(tag) not in identified_tags) :
                     return tag
-                else : 
-                    bot.drive_direct(100, 0)
-                    time.sleep(2)
-                    bot.drive_stop()
-                    rootationCounter += 1
-                    if ( rootationCounter == 8 ):
-                        return -1
+        bot.drive_direct(100, 0)
+        time.sleep(2)
+        bot.drive_stop()
+        rootationCounter += 1
+        if ( rootationCounter == 8 ):
+            return -1
+        
 
 
 def getTagName(tag):
@@ -59,14 +59,17 @@ def getTagName(tag):
 while (True):
     #synchronous reading
     #have not tested
+    
+    print("Identified tags:",identified_tags)
+    print("Tags Left",total_tags_names - identified_tags)
     closest_tag = getClosestTag()
     #move 90 degrees to search for a tag
     if closest_tag == -1 :
-        pass
+        continue
     #(print( getTagName(closest_tag) , closest_tag.rssi  ))
     #move robot forward
-    bot.drive_direct(100, 100)
-    time.sleep(3)
+    # bot.drive_direct(100, 100)
+    # time.sleep(3)
     if (len(identified_tags) == len(total_tags_names)) :
         break
     if abs( closest_tag.rssi ) <= 60 :
