@@ -45,8 +45,7 @@ def getClosestTag(ignore = []):
             if getTagName(tag) in total_tags_names:
                 print( getTagLabel(tag) , tag.rssi  )
                 if (getTagName(tag) not in identified_tags) :
-                    if getTagLabel(tag) not in ignore :
-                        return tag
+                    return tag
         ## EXPLORE - rotates to discover tags
         print("SEARCHING, ROTATION #", rootationCounter)
         bot.drive_direct(100, 0)
@@ -64,73 +63,87 @@ def getTagLabel(tag):
     return tag_dictionary[getTagName(tag)]
 
 while (True):
-    #synchronous reading
-    #have not tested
-    
+    #synchronous reading    
     print("Identified tags:" , identified_tags)
     print("Tags Left" , total_tags_names - identified_tags)
     closest_tag = getClosestTag()
-    #move 90 degrees to search for a tag
+    #Done with scanning
     if (len(identified_tags) == len(total_tags_names)) :
         break
-
+    
     if closest_tag == -1 :
-        bot.drive_direct(100, 100)
-        time.sleep(2)
+        bot.drive_direct(-100, -100)
+        time.sleep(1)
         bot.drive_stop()
         continue
 
     wanted_tag = closest_tag
-    if abs( closest_tag.rssi ) <= 55 :
-        # just check if the tag has been discovered already
-        if ( getTagName(closest_tag) not in identified_tags ) :
-            ## have robot behavior --> found tag
-            bot.drive_direct(-100, -100)
-            print("FOUND: ", getTagName(closest_tag), getTagLabel(closest_tag), closest_tag.rssi)
-            identified_tags.add( getTagName(closest_tag) )
-            tags_left = total_tags_names - identified_tags
-            print("TAGS LEFT:", len(tags_left))
-            # gets a random tag from our wanted set
-            wanted_tag = r.sample(tags_left, 1) [0]
-            # clean for some amount of time
-            # TODO code for cleaning around the RFID Tag
-    else :
-        ## FNDS A TAG -> not in range, tries to get closer
-        previous_reading = abs(closest_tag.rssi)
-        # TODO do some sort of reading and moving until the rssi goes up
-        bot.drive_direct(100, 100)
-        time.sleep(0.5)
-        closest_tag = getClosestTag()
-        post_reading = abs(closest_tag.rssi)
-        ignoreTags = set()
-        if (closest_tag != wanted_tag) :
-            # tag changed? make sure dont move
-            while (wanted_tag != closest_tag) :
-                ignoreTags.add(closest_tag)
-                closest_tag = getClosestTag(ignoreTags)
-                if closest_tag == -1 :
-                    wanted_tag = ignoreTags[-1]
-                    break
-
-        delta = post_reading - previous_reading
-        # positive delta means new reading is worst than old reading, therefore rotate CCW
-        if delta > 0 :
-            #might be last time to rotate right so drive forward somehow
-            # TODO rotate left
-            # TODO command to rotate for some amount of seconds
-            bot.drive_direct(50, 0)
-            time.sleep(2)
-            bot.drive_stop()
-        elif delta < 0 :
-            #rotate right some more to get more readings
-            #TODO rotate right
-            #TODO command to rotate for some amount of seconds
-            bot.drive_direct(50, 0)
-            time.sleep(2)
-            bot.drive_stop()
+    print ("Going After: ", getTagLabel(wanted_tag))
+    while (True):
+        print("RSSI: ", wanted_tag.rssi)
+        if abs( wanted_tag.rssi ) <= 49 :
+            #Tag found
+            if ( getTagName(closest_tag) not in identified_tags ) :
+                #(250,125) (200,100)
+                bot.drive_direct(-100, -100)
+                time.sleep(0.5)
+                bot.drive_direct(-50, -100)
+                time.sleep(0.5)
+                print("FOUND: ", getTagName(closest_tag), getTagLabel(closest_tag), closest_tag.rssi)
+                identified_tags.add( getTagName(closest_tag) )
+                tags_left = total_tags_names - identified_tags
+                print("TAGS LEFT:", len(tags_left))
+                break
         else :
+            ## FINDS A TAG -> not in range, tries to get closer
+            previous_reading = abs(wanted_tag.rssi)
             bot.drive_direct(100, 100)
             time.sleep(0.5)
+            tags = reader.read()
+            for i in range(len(tags)):
+                if getTagName(tags[i]) == getTagName(wanted_tag) :
+                    cond = False
+                    # print ("tag was found")
+                    wanted_tag = tags[i]
+                    break
+                else:
+                    cond = True
+            # New tag has to be claimed
+            if cond and i == len(tags) - 1: 
+                print ("tag was not found, no Delta")
+                break
+            post_reading = abs(wanted_tag.rssi)
+
+            delta = post_reading - previous_reading
+            # positive delta means new reading is worst than old reading, therefore rotate CCW
+            while (delta ==  0):
+                delta = r.randint(-2 , 2)
+            if delta > 0 :
+                print("Delta > 0 ", delta)
+                #might be last time to rotate right so drive forward somehow
+                # TODO rotate left
+                # TODO command to rotate for some amount of seconds
+                if abs(delta) > 2 :
+                    bot.drive_direct(45, 0)
+                elif abs(delta) > 4 :
+                    bot.drive_direct(80, 0)
+                elif abs(delta) > 8 :
+                    bot.drive_direct(120, 0)
+                time.sleep(2)
+                bot.drive_stop()
+            elif delta < 0 :
+                print("Delta < 0", delta)
+                #rotate right some more to get more readings
+                #TODO rotate right
+                #TODO command to rotate for some amount of seconds
+                if abs(delta) > 2 :
+                    bot.drive_direct(0, 45)
+                elif abs(delta) > 4 :
+                    bot.drive_direct(0, 80)
+                elif abs(delta) > 8 :
+                    bot.drive_direct(0, 120)
+                time.sleep(2)
+                bot.drive_stop()
 
 print("Done")
 #clean up one last time??
