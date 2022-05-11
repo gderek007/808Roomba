@@ -47,6 +47,9 @@ bot.safe()
 def getClosestTag(ignore = []):
     rootationCounter = 0
     while ( True ) :
+        if (len(identified_tags) == len(total_tags_names)) :
+            return 2
+            break
         print("START READ:")
         tags = reader.read()
         tags.sort(key = lambda x: abs(x.rssi) ) 
@@ -61,7 +64,6 @@ def getClosestTag(ignore = []):
         bot.drive_direct(100, 0)
         time.sleep(2)
         bot.drive_stop()
-        time.sleep(2)
         rootationCounter += 1
         if ( rootationCounter == 8 ):
             return -1
@@ -71,6 +73,8 @@ def getTagName(tag):
 
 def getTagLabel(tag):
     return tag_dictionary[getTagName(tag)]
+
+start = time.time()
 
 while (True):
     #synchronous reading    
@@ -86,19 +90,21 @@ while (True):
         time.sleep(1)
         bot.drive_stop()
         continue
+    elif closest_tag == 2:
+        break
 
     wanted_tag = closest_tag
     print ("Going After: ", getTagLabel(wanted_tag))
     while (True):
         print("RSSI: ", wanted_tag.rssi)
-        if abs( wanted_tag.rssi ) <= 49 :
+        if abs( wanted_tag.rssi ) <= 59 :
             #Tag found
             if ( getTagName(closest_tag) not in identified_tags ) :
                 #(250,125) (200,100)
-                bot.drive_direct(-200, -200)
-                time.sleep(2)
-                bot.drive_direct(-100, -200)
-                time.sleep(2)
+                bot.drive_direct(-300, -300)
+                time.sleep(1.5)
+                bot.drive_direct(-100, -300)
+                time.sleep(1.5)
                 print("FOUND: ", getTagName(closest_tag), getTagLabel(closest_tag), closest_tag.rssi)
                 identified_tags.add( getTagName(closest_tag) )
                 tags_left = total_tags_names - identified_tags
@@ -107,7 +113,7 @@ while (True):
         else :
             ## FINDS A TAG -> not in range, tries to get closer
             previous_reading = abs(wanted_tag.rssi)
-            bot.drive_direct(100, 100)
+            bot.drive_direct(300, 200)
             time.sleep(0.5)
             tags = reader.read()
             for i in range(len(tags)):
@@ -130,14 +136,18 @@ while (True):
             delta = post_reading - previous_reading
             # positive delta means new reading is worst than old reading, therefore rotate CCW
             sensors = bot.get_sensors()
-            sensors.wall == sensors[1]  # True
-            if (sensors.wall) :
+            print("Sensor value", sensors[1])
+            print("Light bumper ", sensors[35])
+            total = 0
+            for i in sensors[35] :
+                if (i) :
+                    total += 1
+            if ( total > 2 ) :
                 bot.drive_direct(-300, -300)
                 time.sleep(1)
-                bot.stop()
                 bot.drive_direct(-150, 150)
                 time.sleep(.5)
-                bot.stop()
+
 
             while (delta ==  0):
                 delta = r.randint(-1 , 1)
@@ -150,7 +160,7 @@ while (True):
                     bot.drive_direct(80, 0)
                 elif abs(delta) > 8 :
                     bot.drive_direct(120, 0)
-                time.sleep(2)
+                time.sleep(1)
                 bot.drive_stop()
             elif delta < 0 :
                 print("Delta < 0", delta)
@@ -161,7 +171,10 @@ while (True):
                     bot.drive_direct(0, 80)
                 elif abs(delta) > 8 :
                     bot.drive_direct(0, 120)
-                time.sleep(2)
+                time.sleep(1)
                 bot.drive_stop()
 
 print("Done")
+end = time.time()
+print(end - start)
+print(tag_dictionary_misses)
